@@ -1,0 +1,11 @@
+{
+  "cpu": 0.00,
+  "memory": 6.86,
+  "memory_used": 531,
+  "memory_total": 7759,
+  "disk_read": 0.00,
+  "disk_write": 0.00,
+  "net_download": 0.00,
+  "net_upload": 0.00,
+  "cores": [0.97,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00]
+}

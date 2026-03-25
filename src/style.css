@@ -1,0 +1,138 @@
+:root {
+  /* Koyu tema - Cyberpunk/Terminal estetiği */
+  --bg-primary: #0a0e14;
+  --bg-secondary: #0d1117;
+  --bg-card: #161b22;
+  --bg-card-hover: #1c2128;
+  
+  --accent-cyan: #00d9ff;
+  --accent-green: #39ff14;
+  --accent-yellow: #ffd700;
+  --accent-red: #ff3366;
+  --accent-purple: #bf40bf;
+  --accent-orange: #ff6b35;
+  
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  
+  --border-color: #30363d;
+  --border-glow: rgba(0, 217, 255, 0.3);
+  
+  --gradient-cyan: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+  --gradient-green: linear-gradient(135deg, #39ff14 0%, #32cd32 100%);
+  --gradient-yellow: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+  --gradient-red: linear-gradient(135deg, #ff3366 0%, #cc0033 100%);
+  
+  --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+  --font-display: 'Outfit', sans-serif;
+  
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  
+  --shadow-glow: 0 0 20px rgba(0, 217, 255, 0.15);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-display);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Arka plan animasyonu */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(ellipse at 20% 20%, rgba(0, 217, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(57, 255, 20, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(191, 64, 191, 0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Grid çizgileri arka plan efekti */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+#app {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Animasyonlar */
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(0, 217, 255, 0.4);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scanner {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
