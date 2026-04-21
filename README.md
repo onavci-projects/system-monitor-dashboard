@@ -1,134 +1,243 @@
-# System Monitor Dashboard
+# System Monitor Dashboard 📊
 
-Gercek zamanli sistem izleme paneli. Proje 3 katmandan olusur:
-
-1. **C backend (`backend/`)**: CPU, RAM, Disk ve Network metriklerini Linux sisteminden okur.
-2. **Node API (`server/`)**: C tarafinin urettigi JSON dosyasini HTTP endpoint ile sunar.
-3. **Vue frontend (`src/`)**: API'den veriyi cekip dashboard olarak gosterir.
+> Real-time system monitoring dashboard with a C collector, Node.js API, and Vue frontend.
+> 
+>Gerçek zamanlı sistem izleme paneli: C veri toplayıcı, Node.js API ve Vue arayüz.
 
 ---
 
-## Mimari ve Veri Akisi
+## 🇹🇷 Türkçe
 
-- `backend/json_writer` her 1 saniyede `backend/tmp/system_monitor.json` dosyasini gunceller.
-- `server/index.js` bu dosyayi okuyup `GET /api/stats` endpoint'ine cevirir.
-- Frontend (`vite`) her 1 saniyede `/api/stats` cagirir.
-- Vite proxy sayesinde `/api` istekleri `http://localhost:3001` adresine yonlenir.
+### Proje Ne Yapar? 🚀
 
----
+Bu proje CPU, RAM, Disk I/O ve Ağ metriklerini gerçek zamanlı toplar ve dashboard üzerinde gösterir.
 
-## Gereksinimler
+### Mimari (3 Katman) 🧱
 
-### Zorunlu
-- Node.js (18+ onerilir)
+1. *C Collector (backend/)*
+   - Linux sisteminden metrik toplar.
+   - backend/tmp/system_monitor.json dosyasına her 1 saniyede yazar.
+
+2. *Node API (server/)*
+   - JSON dosyasını okur.
+   - GET /api/stats ile frontend'e veri sunar.
+
+3. *Vue Frontend (src/)*
+   - API'den veriyi çekip grafik/kartlarda gösterir.
+
+### Veri Akışı 🔄
+
+C Writer -> system_monitor.json -> Node API (3001) -> Vite Frontend (5173)
+
+### Gereksinimler ✅
+
+- Node.js (18+ önerilir)
 - npm
-- WSL2 + Linux distro (Ubuntu onerilir)
-- GCC / build-essential (WSL icinde)
+- WSL2 + Linux distro (Ubuntu önerilir)
+- GCC / build-essential (WSL içinde)
 
-### Neden WSL gerekiyor?
-`backend/` icindeki C kodu Linux sistem dosyalarini (`/proc`, vb.) okuyarak veri toplar. Bu yuzden C katmani Windows native yerine WSL/Linux ortaminda calismalidir.
+### Neden WSL Gerekli? 🐧
 
----
+backend/ içindeki C kodu Linux sistem kaynaklarını (/proc, vb.) okuyarak metrik toplar. Bu nedenle C katmanı WSL/Linux ortamında çalışmalıdır.
 
-## Kurulum
+### Kurulum ⚙️
 
-Proje kok dizininde:
+Repo kökünde:
 
-```bash
+bash
 npm install
 cd server && npm install
-```
 
----
 
-## Calistirma Secenekleri
+### Çalıştırma - Seçenek 1 (3 Terminal, en garanti) 🖥️
 
-## Secenek 1: 3 Terminal (en acik ve en garanti)
+*Terminal 1 (WSL) - C writer*
 
-### Terminal 1 - WSL (C veri uretici)
-```bash
+bash
 wsl
-cd /mnt/c/All-around/abdurrahman-micro-project/system-monitor-dashboard/backend
+cd /path/to/system-monitor-dashboard/backend
 gcc -Wall -Wextra -g -c memory.c cpu.c disk.c network.c json_writer.c
 gcc -Wall -Wextra -g -o json_writer memory.o cpu.o disk.o network.o json_writer.o
 mkdir -p tmp
 ./json_writer
-```
 
-### Terminal 2 - Windows/WSL (Node API)
-```bash
-cd c:/All-around/abdurrahman-micro-project/system-monitor-dashboard
+
+*Terminal 2 (Windows veya WSL) - API*
+
+bash
+cd /path/to/system-monitor-dashboard
 npm run server
-```
 
-### Terminal 3 - Windows/WSL (Frontend)
-```bash
-cd c:/All-around/abdurrahman-micro-project/system-monitor-dashboard
+
+*Terminal 3 (Windows veya WSL) - Frontend*
+
+bash
+cd /path/to/system-monitor-dashboard
 npm run dev
-```
 
-Ardindan tarayicida:
 
-`http://localhost:5173`
+Tarayıcı: http://localhost:5173
 
----
+### Çalıştırma - Seçenek 2 (2 Terminal, pratik) ⚡
 
-## Secenek 2: 2 Terminal (onerilen pratik kullanim)
+server + frontend + electron tek komutla açılır.
 
-Bu secenekte `server + frontend + electron` tek komutla acilir.
+*Terminal 1 (WSL) - C writer*
 
-### Terminal 1 - WSL (C veri uretici)
-```bash
+bash
 wsl
-cd /mnt/c/All-around/abdurrahman-micro-project/system-monitor-dashboard/backend
+cd /path/to/system-monitor-dashboard/backend
 ./json_writer
-```
 
-### Terminal 2 - Windows (web + API + electron)
-```bash
-cd c:/All-around/abdurrahman-micro-project/system-monitor-dashboard
+
+*Terminal 2 (Windows) - API + Frontend + Electron*
+
+bash
+cd /path/to/system-monitor-dashboard
 npm run electron:dev
-```
+
+
+### API Endpointleri 🌐
+
+- GET /api/stats -> Anlık metrikler
+- POST /api/limits -> Limit bilgisi gönderir
+- GET /api/health -> API sağlık durumu
+
+### Sık Karşılaşılan Sorunlar 🛠️
+
+*1) Veriler sabit veya 0 görünüyor*
+- json_writer çalışıyor mu kontrol et.
+- backend/tmp/system_monitor.json dosyası güncelleniyor mu kontrol et.
+
+*2) C Backend Bulunamadı uyarısı*
+- API JSON dosyasını bulamıyor olabilir.
+- C writer sürecinin WSL içinde aktif olduğundan emin ol.
+
+*3) Port çakışması*
+- 3001 veya 5173 portunu kullanan süreci kapatıp tekrar dene.
 
 ---
 
-## Endpointler
+## 🇬🇧 English
 
-- `GET /api/stats` : Anlik sistem metrikleri
-- `POST /api/limits` : Limit bilgilerini alir (simdilik kayit/onerme amacli)
-- `GET /api/health` : API saglik durumu
+### What This Project Does 🚀
+
+This project collects real-time CPU, Memory, Disk I/O, and Network metrics, then visualizes them on a dashboard.
+
+### Architecture (3 Layers) 🧱
+
+1. *C Collector (backend/)*
+   - Reads low-level Linux system metrics.
+   - Writes data every second to backend/tmp/system_monitor.json.
+
+2. *Node API (server/)*
+   - Reads the JSON file.
+   - Serves data to the frontend via GET /api/stats.
+
+3. *Vue Frontend (src/)*
+   - Polls the API and renders charts/cards in real time.
+
+### Data Flow 🔄
+
+C Writer -> system_monitor.json -> Node API (3001) -> Vite Frontend (5173)
+
+### Requirements ✅
+
+- Node.js (18+ recommended)
+- npm
+- WSL2 + Linux distro (Ubuntu recommended)
+- GCC / build-essential (inside WSL)
+
+### Why WSL Is Required 🐧
+
+The C collector reads Linux system interfaces (/proc, etc.). Because of this, the C layer must run in WSL/Linux.
+
+### Setup ⚙️
+
+From repository root:
+
+bash
+npm install
+cd server && npm install
+
+
+### Run - Option 1 (3 terminals, safest) 🖥️
+
+*Terminal 1 (WSL) - C writer*
+
+bash
+wsl
+cd /path/to/system-monitor-dashboard/backend
+gcc -Wall -Wextra -g -c memory.c cpu.c disk.c network.c json_writer.c
+gcc -Wall -Wextra -g -o json_writer memory.o cpu.o disk.o network.o json_writer.o
+mkdir -p tmp
+./json_writer
+
+
+*Terminal 2 (Windows or WSL) - API*
+
+bash
+cd /path/to/system-monitor-dashboard
+npm run server
+
+
+*Terminal 3 (Windows or WSL) - Frontend*
+
+bash
+cd /path/to/system-monitor-dashboard
+npm run dev
+
+
+Open: http://localhost:5173
+
+### Run - Option 2 (2 terminals, practical) ⚡
+
+This starts server + frontend + electron with one command.
+
+*Terminal 1 (WSL) - C writer*
+
+bash
+wsl
+cd /path/to/system-monitor-dashboard/backend
+./json_writer
+
+
+*Terminal 2 (Windows) - API + Frontend + Electron*
+
+bash
+cd /path/to/system-monitor-dashboard
+npm run electron:dev
+
+
+### API Endpoints 🌐
+
+- GET /api/stats -> Live metrics
+- POST /api/limits -> Sends resource limit settings
+- GET /api/health -> API health check
+
+### Common Issues 🛠️
+
+*1) Values are static or always zero*
+- Check whether json_writer is running.
+- Check whether backend/tmp/system_monitor.json is being updated.
+
+*2) C Backend Not Found warning*
+- The API cannot find/read the JSON file.
+- Ensure C writer is running in WSL.
+
+*3) Port conflicts*
+- Free ports 3001 (API) and 5173 (frontend), then restart.
 
 ---
 
-## Sik Karsilasilan Sorunlar
+## Project Structure 📁
 
-### 1) Dashboard aciliyor ama veriler sabit/0 gorunuyor
-- `json_writer` calismiyor olabilir.
-- `backend/tmp/system_monitor.json` dosyasinin degisme zamanini kontrol et.
-- C surecini WSL icinde baslattigindan emin ol.
-
-### 2) `C Backend Bulunamadi` uyarisini aliyorum
-- `npm run server` acikken API, `../backend/tmp/system_monitor.json` dosyasini bulamiyor demektir.
-- Dosya yolunu ve writer surecini kontrol et.
-
-### 3) Port cakismasi
-- `5173` (frontend) veya `3001` (API) doluysa ilgili sureci kapatip tekrar dene.
-
-### 4) Electron acilmiyor ama web aciliyor
-- Sadece web paneli kullanmak icin `npm run server` + `npm run dev` yeterlidir.
-
----
-
-## Klasor Yapisi
-
-- `backend/` : C kaynak kodu, metrik uretimi
-- `backend/tmp/` : Uretilen JSON veri dosyasi
-- `server/` : Express API
-- `src/` : Vue arayuz
-- `electron/` : Electron baslatma yapisi
-
----
-
-## Not
-
-Bu proje Linux tabanli metrik toplama mantigi ile yazildigi icin en stabil calisma ortami WSL/Linux'tur. Node ve frontend tarafi Windows'ta calissa da C veri toplayicinin WSL icinde calistirilmasi tavsiye edilir.
+text
+system-monitor-dashboard/
+├─ backend/          # C collector and metric generation
+│  └─ tmp/           # Generated JSON output
+├─ server/           # Express API
+├─ src/              # Vue frontend
+├─ electron/         # Electron launcher
+├─ package.json      # Root scripts/dependencies
+└─ README.md
