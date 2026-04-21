@@ -1,43 +1,134 @@
-System Monitor Dashboard 📊
-(Türkçe açıklamalar için aşağı kaydırın / Scroll down for Turkish)
+# System Monitor Dashboard
 
-A real-time system resource monitoring tool developed for Linux environments. This project tracks and visualizes low-level system metrics including CPU load, Memory usage, Disk I/O, and Network traffic.
+Gercek zamanli sistem izleme paneli. Proje 3 katmandan olusur:
 
-Built with a 3-tier architecture, the backend uses C and Linux system calls to extract raw data directly from the OS kernel. A Node.js server acts as the middleware (API), and the frontend provides a clean, real-time visualization using TypeScript and Vite.
+1. **C backend (`backend/`)**: CPU, RAM, Disk ve Network metriklerini Linux sisteminden okur.
+2. **Node API (`server/`)**: C tarafinin urettigi JSON dosyasini HTTP endpoint ile sunar.
+3. **Vue frontend (`src/`)**: API'den veriyi cekip dashboard olarak gosterir.
 
-🚀 Features
-CPU Tracking: Real-time processor load and utilization.
+---
 
-Memory (RAM) Statistics: Total, used, and free memory analysis.
+## Mimari ve Veri Akisi
 
-Disk I/O: Read/write speeds and storage capacities.
+- `backend/json_writer` her 1 saniyede `backend/tmp/system_monitor.json` dosyasini gunceller.
+- `server/index.js` bu dosyayi okuyup `GET /api/stats` endpoint'ine cevirir.
+- Frontend (`vite`) her 1 saniyede `/api/stats` cagirir.
+- Vite proxy sayesinde `/api` istekleri `http://localhost:3001` adresine yonlenir.
 
-Network Monitoring: Active network traffic data.
+---
 
-📂 Project Structure
-backend/ : C codebase for low-level OS metrics extraction (cpu.c, memory.c, disk.c, Makefile)
-server/ : Node.js backend to serve data to the frontend (index.js)
-src/ : Frontend TypeScript and UI logic
-index.html : Main entry point for the dashboard
-package.json : Frontend Node.js dependencies
+## Gereksinimler
 
-Sistem İzleme Aracı (Turkish) 📊
-Linux ortamında (Ubuntu, WSL vb.) sistem kaynaklarını gerçek zamanlı olarak izlemek için geliştirilmiş, 3 katmanlı mimariye sahip bir sistem izleme aracıdır. Bu proje; CPU yükü, Bellek (RAM) kullanımı, Disk G/Ç işlemleri ve Ağ trafiği gibi düşük seviyeli (low-level) metrikleri takip eder ve görselleştirir.
+### Zorunlu
+- Node.js (18+ onerilir)
+- npm
+- WSL2 + Linux distro (Ubuntu onerilir)
+- GCC / build-essential (WSL icinde)
 
-Arka plan (backend) C dili ile yazılmış olup, doğrudan işletim sistemi çekirdeğinden veri çekmek için düşük seviyeli Linux sistem çağrılarını (open, read, write vb.) kullanır. Veriler bir Node.js sunucusu üzerinden arayüze aktarılır ve ön yüz (frontend) TypeScript ile tasarlanmıştır.
+### Neden WSL gerekiyor?
+`backend/` icindeki C kodu Linux sistem dosyalarini (`/proc`, vb.) okuyarak veri toplar. Bu yuzden C katmani Windows native yerine WSL/Linux ortaminda calismalidir.
 
-🚀 Özellikler
-CPU Takibi: Gerçek zamanlı işlemci yükü ve anlık kullanım verileri.
+---
 
-Bellek (RAM) İstatistikleri: Toplam, kullanılan ve boş bellek analizi.
+## Kurulum
 
-Disk G/Ç: Okuma/Yazma hızları ve disk doluluk oranları.
+Proje kok dizininde:
 
-Ağ Trafiği (Network) İzleme: Anlık ağ kullanım verileri.
+```bash
+npm install
+cd server && npm install
+```
 
-📂 Proje Yapısı
-backend/ : Düşük seviyeli OS metriklerini çeken C kodları ve Makefile
-server/ : Verileri ön yüze sunan Node.js sunucusu (API)
-src/ : Ön yüz (Frontend) TypeScript ve arayüz mantığı
-index.html : Panel için ana giriş sayfası
-package.json : Ön yüz için Node.js bağımlılıkları
+---
+
+## Calistirma Secenekleri
+
+## Secenek 1: 3 Terminal (en acik ve en garanti)
+
+### Terminal 1 - WSL (C veri uretici)
+```bash
+wsl
+cd /mnt/c/All-around/abdurrahman-micro-project/system-monitor-dashboard/backend
+gcc -Wall -Wextra -g -c memory.c cpu.c disk.c network.c json_writer.c
+gcc -Wall -Wextra -g -o json_writer memory.o cpu.o disk.o network.o json_writer.o
+mkdir -p tmp
+./json_writer
+```
+
+### Terminal 2 - Windows/WSL (Node API)
+```bash
+cd c:/All-around/abdurrahman-micro-project/system-monitor-dashboard
+npm run server
+```
+
+### Terminal 3 - Windows/WSL (Frontend)
+```bash
+cd c:/All-around/abdurrahman-micro-project/system-monitor-dashboard
+npm run dev
+```
+
+Ardindan tarayicida:
+
+`http://localhost:5173`
+
+---
+
+## Secenek 2: 2 Terminal (onerilen pratik kullanim)
+
+Bu secenekte `server + frontend + electron` tek komutla acilir.
+
+### Terminal 1 - WSL (C veri uretici)
+```bash
+wsl
+cd /mnt/c/All-around/abdurrahman-micro-project/system-monitor-dashboard/backend
+./json_writer
+```
+
+### Terminal 2 - Windows (web + API + electron)
+```bash
+cd c:/All-around/abdurrahman-micro-project/system-monitor-dashboard
+npm run electron:dev
+```
+
+---
+
+## Endpointler
+
+- `GET /api/stats` : Anlik sistem metrikleri
+- `POST /api/limits` : Limit bilgilerini alir (simdilik kayit/onerme amacli)
+- `GET /api/health` : API saglik durumu
+
+---
+
+## Sik Karsilasilan Sorunlar
+
+### 1) Dashboard aciliyor ama veriler sabit/0 gorunuyor
+- `json_writer` calismiyor olabilir.
+- `backend/tmp/system_monitor.json` dosyasinin degisme zamanini kontrol et.
+- C surecini WSL icinde baslattigindan emin ol.
+
+### 2) `C Backend Bulunamadi` uyarisini aliyorum
+- `npm run server` acikken API, `../backend/tmp/system_monitor.json` dosyasini bulamiyor demektir.
+- Dosya yolunu ve writer surecini kontrol et.
+
+### 3) Port cakismasi
+- `5173` (frontend) veya `3001` (API) doluysa ilgili sureci kapatip tekrar dene.
+
+### 4) Electron acilmiyor ama web aciliyor
+- Sadece web paneli kullanmak icin `npm run server` + `npm run dev` yeterlidir.
+
+---
+
+## Klasor Yapisi
+
+- `backend/` : C kaynak kodu, metrik uretimi
+- `backend/tmp/` : Uretilen JSON veri dosyasi
+- `server/` : Express API
+- `src/` : Vue arayuz
+- `electron/` : Electron baslatma yapisi
+
+---
+
+## Not
+
+Bu proje Linux tabanli metrik toplama mantigi ile yazildigi icin en stabil calisma ortami WSL/Linux'tur. Node ve frontend tarafi Windows'ta calissa da C veri toplayicinin WSL icinde calistirilmasi tavsiye edilir.
